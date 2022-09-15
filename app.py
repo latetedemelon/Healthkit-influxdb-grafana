@@ -4,8 +4,17 @@ import socket
 import logging
 from datetime import datetime
 from flask import request, Flask
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 from geolib import geohash
+
+influx_host = sys.argv[1]
+influx_port = int(sys.argv[2])
+app_host = sys.argv[3]
+app_port = int(sys.argv[4])
+influx_org = sys.argv[5]
+influx_bucket = sys.argv[6]
+influx_token = sys.argv[7]
 
 DATAPOINTS_CHUNK = 80000
 
@@ -20,9 +29,9 @@ logger.addHandler(handler)
 app = Flask(__name__)
 app.debug = True
 
-client = InfluxDBClient(host='localhost', port=8086)
-client.create_database('db')
-client.switch_database('db')
+influx_url = f"http://{influx_host}:{influx_port}"
+client = InfluxDBClient(url=influx_url, token=influx_token, org=influx_org)
+write_api = client.write_api(write_options=SYNCHRONOUS)
 
 @app.route('/collect', methods=['POST', 'GET'])
 def collect():
@@ -65,7 +74,7 @@ def collect():
 
         for i in range(0, len(transformed_data), DATAPOINTS_CHUNK):
             logger.info(f"DB Writing chunk")
-            client.write_points(transformed_data[i:i + DATAPOINTS_CHUNK])
+            write_api.write(bucket=influx_bucket, org=influx_org, record=transformed_data[i:i + DATAPOINTS_CHUNK])
         
         logger.info(f"DB Metrics Write Complete")
         logger.info(f"Ingesting Workouts Routes")
@@ -91,7 +100,7 @@ def collect():
 
             for i in range(0, len(transformed_workout_data), DATAPOINTS_CHUNK):
                 logger.info(f"DB Writing chunk")
-                client.write_points(transformed_workout_data[i:i + DATAPOINTS_CHUNK])
+                write_api.write(bucket=influx_bucket, org=influx_org, record=transformed_workout_data[i:i + DATAPOINTS_CHUNK])
         
         logger.info(f"Ingesting Workouts Complete")
     except:
@@ -104,4 +113,4 @@ if __name__ == "__main__":
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
     logger.info(f"Local Network Endpoint: http://{ip_address}/collect")
-    app.run(host='0.0.0.0', port=5353)
+    app.run(host=app_host, port=app_port)
