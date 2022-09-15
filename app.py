@@ -113,5 +113,10 @@ def collect():
 if __name__ == "__main__":
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
+    logger.info(f"InfluxDB URL: {influx_url}")
+    logger.info(f"InfluxDB Org: {influx_org}")
+    logger.info(f"InfluxDB Bucket: {influx_bucket}")
     logger.info(f"Local Network Endpoint: http://{ip_address}/collect")
     app.run(host=app_host, port=app_port)
+
+    # curl -X POST -d '{ "key: "value" }' http://localhost:5353/collect
