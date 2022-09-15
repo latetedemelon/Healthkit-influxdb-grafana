@@ -1,3 +1,3 @@
 flask
-influxdb
+influxdb-client
 geolib
