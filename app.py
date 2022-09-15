@@ -7,14 +7,15 @@ from flask import request, Flask
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from geolib import geohash
+import os
 
-influx_host = sys.argv[1]
-influx_port = int(sys.argv[2])
-app_host = sys.argv[3]
-app_port = int(sys.argv[4])
-influx_org = sys.argv[5]
-influx_bucket = sys.argv[6]
-influx_token = sys.argv[7]
+influx_host = os.getenv('INFLUXDB_HOST')
+influx_port = os.getenv('INFLUXDB_PORT')
+influx_org = os.getenv('INFLUXDB_ORG')
+influx_bucket = os.getenv('INFLUXDB_BUCKET')
+influx_token = os.getenv('INFLUXDB_TOKEN')
+app_host = "localhost"
+app_port = 5353
 
 DATAPOINTS_CHUNK = 80000
 
