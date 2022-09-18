@@ -10,7 +10,4 @@ COPY . .
 
 RUN pip3 install -r requirements.txt
 
-EXPOSE 5353/tcp
-EXPOSE 80/tcp
-
 CMD [ "python3.9", "app.py"]

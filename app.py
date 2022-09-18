@@ -14,7 +14,7 @@ influx_port = os.getenv('INFLUXDB_PORT')
 influx_org = os.getenv('INFLUXDB_ORG')
 influx_bucket = os.getenv('INFLUXDB_BUCKET')
 influx_token = os.getenv('INFLUXDB_TOKEN')
-app_host = "localhost"
+app_host = "0.0.0.0"
 app_port = 5353
 
 DATAPOINTS_CHUNK = 80000
