@@ -1,19 +1,27 @@
+"""App"""
+# pylint:disable=logging-fstring-interpolation
+# pylint:disable=invalid-name
+# pylint:disable=missing-function-docstring
+
 import json
+import os
 import sys
 import socket
 import logging
-from datetime import datetime
-from flask import request, Flask
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
-from geolib import geohash
-import os
 
-influx_host = os.getenv('INFLUXDB_HOST')
-influx_port = os.getenv('INFLUXDB_PORT')
-influx_org = os.getenv('INFLUXDB_ORG')
-influx_bucket = os.getenv('INFLUXDB_BUCKET')
-influx_token = os.getenv('INFLUXDB_TOKEN')
+from flask import request, Flask
+
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
+
+from geolib import geohash
+
+influx_host = str(os.getenv('INFLUXDB_HOST'))
+influx_port = str(os.getenv('INFLUXDB_PORT'))
+influx_org = str(os.getenv('INFLUXDB_ORG'))
+influx_bucket = str(os.getenv('INFLUXDB_BUCKET'))
+influx_token = str(os.getenv('INFLUXDB_TOKEN'))
+
 app_host = "0.0.0.0"
 app_port = 5353
 
@@ -36,18 +44,18 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 @app.route('/collect', methods=['POST', 'GET'])
 def collect():
-    logger.info(f"Request received")
-    
+    logger.info("Request received")
+
     healthkit_data = None
     transformed_data = []
 
     try:
         healthkit_data = json.loads(request.data)
-    except:
+    except: #pylint:disable=bare-except
         return "Invalid JSON Received", 400
-    
+
     try:
-        logger.info(f"Ingesting Metrics")
+        logger.info("Ingesting Metrics")
         for metric in healthkit_data.get("data", {}).get("metrics", []):
             number_fields = []
             string_fields = []
@@ -55,7 +63,7 @@ def collect():
                 metric_fields = set(datapoint.keys())
                 metric_fields.remove("date")
                 for mfield in metric_fields:
-                    if type(datapoint[mfield]) == int or type(datapoint[mfield]) == float:
+                    if isinstance(datapoint[mfield], (int, float)):
                         number_fields.append(mfield)
                     else:
                         string_fields.append(mfield)
@@ -69,19 +77,23 @@ def collect():
                 number_fields.clear()
                 string_fields.clear()
 
-        logger.info(f"Data Transformation Complete")
-        logger.info(f"Number of data points to write: {len(transformed_data)}")
-        logger.info(f"DB Write Started")
+        logger.info("Data Transformation Complete")
+        logger.info("Number of data points to write: {len(transformed_data)}")
+        logger.info("DB Write Started")
 
         for i in range(0, len(transformed_data), DATAPOINTS_CHUNK):
-            logger.info(f"DB Writing chunk")
-            write_api.write(bucket=influx_bucket, org=influx_org, record=transformed_data[i:i + DATAPOINTS_CHUNK])
-        
-        logger.info(f"DB Metrics Write Complete")
-        logger.info(f"Ingesting Workouts Routes")
+            logger.info("DB Writing chunk")
+            write_api.write(
+                bucket=influx_bucket,
+                org=influx_org,
+                record=transformed_data[i:i + DATAPOINTS_CHUNK]
+            )
+
+        logger.info("DB Metrics Write Complete")
+        logger.info("Ingesting Workouts Routes")
 
         transformed_workout_data = []
-        
+
         for workout in healthkit_data.get("data", {}).get("workouts", []):
             tags = {
                 "id": workout["name"] + "-" + workout["start"] + "-" + workout["end"]
@@ -100,11 +112,15 @@ def collect():
                 transformed_workout_data.append(point)
 
             for i in range(0, len(transformed_workout_data), DATAPOINTS_CHUNK):
-                logger.info(f"DB Writing chunk")
-                write_api.write(bucket=influx_bucket, org=influx_org, record=transformed_workout_data[i:i + DATAPOINTS_CHUNK])
-        
-        logger.info(f"Ingesting Workouts Complete")
-    except:
+                logger.info("DB Writing chunk")
+                write_api.write(
+                    bucket=influx_bucket,
+                    org=influx_org,
+                    record=transformed_workout_data[i:i + DATAPOINTS_CHUNK]
+                )
+
+        logger.info("Ingesting Workouts Complete")
+    except: # pylint: disable=bare-except
         logger.exception("Caught Exception. See stacktrace for details.")
         return "Server Error", 500
 
@@ -118,5 +134,4 @@ if __name__ == "__main__":
     logger.info(f"InfluxDB Bucket: {influx_bucket}")
     logger.info(f"Local Network Endpoint: http://{ip_address}/collect")
     app.run(host=app_host, port=app_port)
-
     # curl -X POST -d '{ "key: "value" }' http://localhost:5353/collect
