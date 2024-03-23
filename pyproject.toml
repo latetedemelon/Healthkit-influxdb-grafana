@@ -1,0 +1,18 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "health_data"
+version = "0.1.0"
+description = ""  # Add your project description here
+authors = ["Your Name <your.email@example.com>"]  # Replace with your name and email
+
+[tool.poetry.dependencies]
+python = "^3.8"  # Replace with your Python version
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
