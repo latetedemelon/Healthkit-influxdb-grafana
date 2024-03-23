@@ -8,3 +8,5 @@ All I've done is added some things to set up with Docker and update the InfluxDB
 * `INFLUXDB_ORG`
 * `INFLUXDB_TOKEN`
 * `INFLUXDB_BUCKET`
+* `APP_HOST`
+* `APP_PORT`
