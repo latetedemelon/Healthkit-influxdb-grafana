@@ -1,17 +1,15 @@
-# Docker-Compose example file that uses the app as well as an InfluxDB container
-
 version: '3'
 
 services:
   app:
-    image: "ghcr.io/samanthavbarron/healthkit-influxdb-grafana"
+    image: "ghcr.io/samanthavbarron/healthkit-influxdb-grafana:main"
     ports:
-      - "5353:5353"
+      - "5357:5353"
     environment:
       - APP_HOST=0.0.0.0
       - APP_PORT=5353
       - INFLUXDB_HOST=0.0.0.0
-      - INFLUXDB_PORT=8086
+      - INFLUXDB_PORT=8087
       - INFLUXDB_ORG=my_org_name
       - INFLUXDB_BUCKET=my_bucket_name
       - INFLUXDB_TOKEN=my_token
@@ -21,11 +19,11 @@ services:
       unless-stopped
 
   influxdb2:
-    image: influxdb2:latest
+    image: influxdb:2
     restart:
       unless-stopped
     ports:
-      - "8086:8086"
+      - "8087:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_config:/etc/influxdb2
