@@ -35,7 +35,7 @@ class TestExampleData(unittest.TestCase):
         response = self.client.post("/collect", json=data)
         self.assertEqual(response.status_code, 200)
 
-class TestModel(unittest.TestCase):
+class TestModels(unittest.TestCase):
 
     def setUp(self):
         metrics = json.load(open(EXAMPLE_DATA_PATH))["data"]["metrics"]
