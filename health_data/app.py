@@ -8,7 +8,8 @@ import logging
 
 from flask import request, Flask
 
-from health_data.models import metric_from_dict, Metric, SleepAnalysisMetric
+from health_data.models import metric_from_dict
+from health_data.influx_config import write_points
 
 from dataclasses import dataclass
 
@@ -38,19 +39,28 @@ def collect():
         logger.info("Request received")
         request_json = json.loads(request.data)
         logger.info(f"Request JSON loaded, keys: {str(request_json.keys())}")
-        metrics = request_json["data"]["metrics"]
+        raw_metrics = request_json["data"]["metrics"]
+        del request_json
     except: #pylint:disable=bare-except
         return "Invalid JSON Received", 400
 
-    for metric in metrics:
-        try:
-            metric = metric_from_dict(metric)
-            logger.info(f"Metric received: {type(metric)}")
-            logger.info(f"Metric data length: {len(metric.data)}")
-        except:
-            logger.exception("Error processing metric")
+    metrics = []
 
-        logger.info("Logging data to InfluxDB...")
+    while raw_metrics:
+        raw_metric = raw_metrics.pop()
+        try:
+            metrics.append(metric_from_dict(raw_metric))
+            logger.info(f"Metric received: {type(metrics[-1])}")
+            logger.info(f"Metric data length: {len(metrics[-1].data)}")
+        except:
+            logger.error(f"Error processing metric")
+    
+    for metric in metrics:
+        logger.info(f"Logging metric: {type(metric)}")
+        try:
+            write_points(metric.points())
+        except:
+            logger.error(f"Error writing metric to InfluxDB: {type(metric)}")
 
     return "Success", 200
 

@@ -1,8 +1,4 @@
-"""This test module reads in the example data from `./data.json` and 
-sends it to the `/collect` endpoint of the Flask app. It then checks
-the response status code and the response message to ensure that the
-data was received successfully.
-"""
+"""Tests for the app and models modules."""
 
 import unittest
 from copy import copy
@@ -25,7 +21,7 @@ EXAMPLE_DATA_PATH = os.path.join(
     "data.json"
 )
 
-class TestExampleData(unittest.TestCase):
+class TestApp(unittest.TestCase):
 
     def setUp(self):
         self.app = app
@@ -33,6 +29,9 @@ class TestExampleData(unittest.TestCase):
         self.client = self.app.test_client()
     
     def test_example_data(self):
+        """Test that the request can be sensibly received and processed.
+        This test will still pass even if the data is not written to InfluxDB.
+        """
         data = json.load(open(EXAMPLE_DATA_PATH))
         response = self.client.post("/collect", json=data)
         self.assertEqual(response.status_code, 200)
@@ -48,13 +47,13 @@ class TestModels(unittest.TestCase):
                 self.raw_sleep_metric = copy(metric)
             else:
                 self.raw_metrics.append(copy(metric))
-
         try:
             self.raw_sleep_metric
         except AttributeError:
             raise ValueError("No sleep_analysis metric found in data.json")
 
     def test_metric_from_dict(self):
+        """Test that we can get a Metric object from a dictionary."""
         self.assertGreater(len(self.raw_metrics), 0)
         for raw_metric in self.raw_metrics:
             metric = metric_from_dict(raw_metric)
@@ -67,6 +66,7 @@ class TestModels(unittest.TestCase):
         self.assertIsInstance(sleep_metric.data[0], SleepAnalysisRecord)
 
     def test_metric_points(self):
+        """Test that we can get a list of Point objects from a Metric object."""
         sleep_metric = metric_from_dict(self.raw_sleep_metric)
         points = list(sleep_metric.points())
         self.assertGreater(len(points), 0)
