@@ -14,7 +14,7 @@ This only collects things like heart rate, active energy, sleep, etc. This curre
 
 ### Docker Installation
 
-1. Download the example Docker Compose file
+1. Download the [example Docker Compose file](https://github.com/samanthavbarron/Healthkit-influxdb-grafana/blob/main/docker-compose.yml).
 2. Edit the environment variables, ports, etc. to your liking.
 3. `docker-compose up -d`
 
