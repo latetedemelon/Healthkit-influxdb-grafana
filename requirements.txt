@@ -2,3 +2,4 @@ flask
 influxdb-client
 geolib
 python-dotenv
+pydantic
