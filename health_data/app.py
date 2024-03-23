@@ -3,6 +3,7 @@
 # pylint:disable=invalid-name
 # pylint:disable=missing-function-docstring
 
+from dataclasses import dataclass
 import json
 import logging
 
@@ -10,8 +11,6 @@ from flask import request, Flask
 
 from health_data.models import metric_from_dict
 from health_data.influx_config import write_points
-
-from dataclasses import dataclass
 
 
 @dataclass
