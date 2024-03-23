@@ -33,4 +33,7 @@ class SleepAnalysisMetric(Metric):
 def metric_from_dict(data: dict) -> Metric | SleepAnalysisMetric:
     if data["name"] == "sleep_analysis":
         return SleepAnalysisMetric(**data)
-    return Metric(**data)
+    try:
+        return Metric(**data)
+    except:
+        raise ValueError("Invalid metric data provided")
