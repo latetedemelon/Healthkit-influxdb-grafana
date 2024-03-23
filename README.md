@@ -12,7 +12,13 @@ This only collects things like heart rate, active energy, sleep, etc. This curre
 
 ## Installation
 
-TODO: Docker install.
+### Docker Installation
+
+1. Download the example Docker Compose file
+2. Edit the environment variables, ports, etc. to your liking.
+3. `docker-compose up -d`
+
+### Python Installation
 
 1. Clone the repository: `git clone https://github.com/samanthavbarron/Healthkit-influxdb-grafana.git`
 2. CD into directory: `cd Healthkit-influxdb-grafana`
