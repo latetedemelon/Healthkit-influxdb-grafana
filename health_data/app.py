@@ -14,7 +14,7 @@ from flask import request, Flask
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-from geolib import geohash
+from health_data.models import metric_from_dict, Metric, SleepAnalysisMetric
 
 influx_host = str(os.getenv('INFLUXDB_HOST'))
 influx_port = str(os.getenv('INFLUXDB_PORT'))
