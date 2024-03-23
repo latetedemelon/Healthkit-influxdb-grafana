@@ -1,6 +1,6 @@
 # Readme
 
-This python package provides a simple API endpoint that can collect Apple Health data via the iOS app [Health Auto Export - JSON+CSV](https://apps.apple.com/us/app/health-auto-export-json-csv/id1115567069).
+This project allows the user to automatically export their Apple Health data to an InfluxDB V2 instance. This is accomplished by implementing a simple API that accepts data from the iOS app [Health Auto Export - JSON+CSV](https://apps.apple.com/us/app/health-auto-export-json-csv/id1115567069) and ingests it into an InfluxDB V2 instance via a flask API endpoint.
 
 This only collects things like heart rate, active energy, sleep, etc. This currently does not export workouts, symptoms, or ECG data.
 
@@ -8,7 +8,7 @@ This only collects things like heart rate, active energy, sleep, etc. This curre
 
 - Tested on Python 3.10.
 - An iOS device with the app linked above.
-- An InfluxDB V2 instance. See `example_make_influxdb.sh` for example script to set up.
+- An InfluxDB V2 instance.
 
 ## Installation
 
