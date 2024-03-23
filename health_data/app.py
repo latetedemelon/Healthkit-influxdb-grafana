@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import json
 import logging
 
+import os
+
 from flask import request, Flask
 
 from health_data.models import metric_from_dict
@@ -17,13 +19,17 @@ from health_data.influx_config import write_points
 class AppConfig:
     host: str
     port: int
-    chunks: int
     debug: bool
 
+host = os.getenv("APP_HOST")
+port = os.getenv("APP_PORT")
+if port:
+    port = int(port)
+
+
 app_config = AppConfig(
-    host = "0.0.0.0",
-    port = 5353,
-    chunks = 80000,
+    host = host if host else "0.0.0.0",
+    port = port if port else 5353,
     debug = True,
 )
 
@@ -55,15 +61,18 @@ def collect():
             logger.error(f"Error processing metric")
     
     for metric in metrics:
-        logger.info(f"Logging metric: {type(metric)}")
+        logger.info(f"Logging metric: {type(metric)}, {metric.name}")
         try:
             write_points(metric.points())
-        except:
+        except Exception as err:
             logger.error(f"Error writing metric to InfluxDB: {type(metric)}")
+            logger.error(str(err))
 
     return "Success", 200
 
 if __name__ == "__main__":
+    logging.basicConfig(filename="app.log", level=logging.DEBUG)
+    logging.info("Starting app...")
     app.run(
         host=app_config.host,
         port=app_config.port,

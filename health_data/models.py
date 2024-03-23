@@ -5,9 +5,16 @@ from pydantic import BaseModel
 
 from influxdb_client import Point
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class DataRecord(BaseModel):
     date: str
     qty: Optional[float] = None
+    Min: Optional[float] = None
+    Max: Optional[float] = None
+    Avg: Optional[float] = None
     source: Optional[str] = None
 
 class Metric(BaseModel):
@@ -17,12 +24,15 @@ class Metric(BaseModel):
 
     def points(self) -> Generator[Point, None, None]:
         for record in self.data:
-            yield Point.from_dict({
-                "measurement": self.name,
-                "fields": {"value": record.qty, "units": self.units},
-                "tags": {"source": record.source},
-                "time": record.date,
-            })
+            for value_name in ["qty", "Min", "Max", "Avg"]:
+                if (val := getattr(record, value_name)) is not None:
+                    point_dict = {
+                        "measurement": self.name,
+                        "fields": {"value": val},
+                        "tags": {"source": record.source, "units": self.units, "agg": value_name},
+                        "time": record.date,
+                    }
+                    yield Point.from_dict(point_dict)
 
 class SleepAnalysisRecord(DataRecord):
     asleep: float
@@ -50,12 +60,13 @@ class SleepAnalysisMetric(Metric):
         field_names = self.fields()
         for record in self.data:
             for field in field_names["durations"]:
-                yield Point.from_dict({
+                point_dict = {
                     "measurement": field,
-                    "fields": {"value": getattr(record, field), "units": self.units},
-                    "tags": {"source": record.source, "type": "sleep"},
+                    "fields": {"value": getattr(record, field)},
+                    "tags": {"source": record.source, "type": "sleep", "units": self.units},
                     "time": record.date,
-                })
+                }
+                yield Point.from_dict(point_dict)
 
             yield Point.from_dict({
                 "measurement": "in_bed",
