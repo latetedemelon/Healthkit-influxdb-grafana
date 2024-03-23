@@ -4,12 +4,12 @@ services:
   app:
     image: "ghcr.io/samanthavbarron/healthkit-influxdb-grafana:main"
     ports:
-      - "5357:5353"
+      - "5353:5353"
     environment:
       - APP_HOST=0.0.0.0
       - APP_PORT=5353
       - INFLUXDB_HOST=0.0.0.0
-      - INFLUXDB_PORT=8087
+      - INFLUXDB_PORT=8086
       - INFLUXDB_ORG=my_org_name
       - INFLUXDB_BUCKET=my_bucket_name
       - INFLUXDB_TOKEN=my_token
@@ -23,7 +23,7 @@ services:
     restart:
       unless-stopped
     ports:
-      - "8087:8086"
+      - "8086:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_config:/etc/influxdb2
