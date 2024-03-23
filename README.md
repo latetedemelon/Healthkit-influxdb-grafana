@@ -5,7 +5,7 @@ This python package provides a simple API endpoint that can collect Apple Health
 ## Requirements
 
 - Tested on Python 3.10.
-- An InfluxDB V2 instance.
+- An InfluxDB V2 instance. See `example_make_influxdb.sh` for example script to set up.
 - An iOS device.
 
 ## Installation
