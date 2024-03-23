@@ -1,6 +1,6 @@
 # Readme
 
-This project allows the user to automatically export their Apple Health data to an InfluxDB V2 instance. This is accomplished by implementing a simple API that accepts data from the iOS app [Health Auto Export - JSON+CSV](https://apps.apple.com/us/app/health-auto-export-json-csv/id1115567069) and ingests it into an InfluxDB V2 instance via a flask API endpoint.
+This project allows the user to automatically export their Apple Health data to an InfluxDB V2 instance. This is accomplished by implementing a simple API that accepts data from the iOS app [Health Auto Export - JSON+CSV](https://apps.apple.com/us/app/health-auto-export-json-csv/id1115567069) and ingests it into an InfluxDB V2 instance via a flask API endpoint. This was originally based on the repository from which it was forked, but has changed significantly since then.
 
 This only collects things like heart rate, active energy, sleep, etc. This currently does not export workouts, symptoms, or ECG data.
 
