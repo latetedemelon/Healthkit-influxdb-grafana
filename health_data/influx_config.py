@@ -15,7 +15,7 @@ class InfluxConfig:
     org: Optional[str]
     bucket: Optional[str]
     token: Optional[str]
-    
+
     def url(self):
         return f"http://{self.host}:{self.port}"
 
@@ -37,5 +37,6 @@ influx_write_api = influx_client.write_api(write_options=SYNCHRONOUS)
 def write_points(points: Sequence[Point]):
     influx_write_api.write(
         bucket=influx_config.bucket,
-        record=points
+        record=points,
+        batch_size=10_000,
     )

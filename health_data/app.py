@@ -36,6 +36,7 @@ app_config = AppConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
 app.debug = app_config.debug
 
 @app.route('/collect', methods=['POST', 'GET'])
