@@ -31,6 +31,7 @@ influx_client = InfluxDBClient(
     url=influx_config.url(),
     token=influx_config.token,
     org=influx_config.org,
+    timeout=20_000,
 )
 influx_write_api = influx_client.write_api(write_options=SYNCHRONOUS)
 
