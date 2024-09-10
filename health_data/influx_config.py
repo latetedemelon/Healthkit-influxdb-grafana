@@ -1,43 +1,44 @@
-"""Module to store the InfluxDB configuration data."""
+"""Module to store the VictoriaMetrics configuration and data handling."""
 
 import os
-from typing import Optional, Sequence
-from dataclasses import dataclass
+import logging
+import requests
+from typing import Sequence
 
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
+logger = logging.getLogger(__name__)
 
+# VictoriaMetrics configuration
+VICTORIA_METRICS_URL = os.getenv("VICTORIA_METRICS_URL", "http://localhost:8428/api/v1/import/prometheus")
 
-@dataclass
-class InfluxConfig:
-    host: Optional[str]
-    port: Optional[str]
-    org: Optional[str]
-    bucket: Optional[str]
-    token: Optional[str]
+def send_to_victoria_metrics(data: str):
+    """
+    Send a batch of metrics to VictoriaMetrics using Prometheus-compatible line protocol.
+    
+    Args:
+        data (str): The metrics data in line protocol format to be sent to VictoriaMetrics.
+    """
+    try:
+        response = requests.post(VICTORIA_METRICS_URL, data=data)
+        if response.status_code != 200:
+            logger.error(f"Error sending data to VictoriaMetrics: {response.status_code} - {response.text}")
+        else:
+            logger.info("Successfully sent data to VictoriaMetrics")
+    except Exception as e:
+        logger.error(f"Exception while sending data to VictoriaMetrics: {e}")
 
-    def url(self):
-        return f"http://{self.host}:{self.port}"
+def write_points(points: Sequence[str]):
+    """
+    Send the points data to VictoriaMetrics. The points should be in Prometheus line protocol format.
+    
+    Args:
+        points (Sequence[str]): A list of metric data points to be sent to VictoriaMetrics.
+    """
+    if not points:
+        logger.warning("No points to write to VictoriaMetrics.")
+        return
 
-influx_config = InfluxConfig(
-    host=os.getenv('INFLUXDB_HOST'),
-    port=os.getenv('INFLUXDB_PORT'),
-    org=os.getenv('INFLUXDB_ORG'),
-    bucket=os.getenv('INFLUXDB_BUCKET'),
-    token=os.getenv('INFLUXDB_TOKEN'),
-)
-
-influx_client = InfluxDBClient(
-    url=influx_config.url(),
-    token=influx_config.token,
-    org=influx_config.org,
-    timeout=20_000,
-)
-influx_write_api = influx_client.write_api(write_options=SYNCHRONOUS)
-
-def write_points(points: Sequence[Point]):
-    influx_write_api.write(
-        bucket=influx_config.bucket,
-        record=points,
-        batch_size=10_000,
-    )
+    # Prepare the data to be sent
+    data = "\n".join(points)
+    
+    # Send the data to VictoriaMetrics
+    send_to_victoria_metrics(data)
